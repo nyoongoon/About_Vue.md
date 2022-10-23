@@ -1495,19 +1495,19 @@ export default {
 - 싱글 파일 컴포넌트(SFC)의 스펙과 다양한 기능들 
 ## 언어 블록
 ### <template>
-- 각 *.vue 파일은한 번에 하나의 top-level <template>블록을 포함할 수 있음.
+- 각 \*.vue 파일은한 번에 하나의 top-level <template>블록을 포함할 수 있음.
 - 콘텐츠는 추출되어 @vue/compiler-dom으로 전달되고, JavaScript 렌더 기능으로 사전 컴파일되고, render 옵션으로 내보내어 컴포넌트에 첨부됨.
 ### <script>
-- 각 *.vue 파일은 한번에 최대 하나의 <script>블록을 포함할 수 있음 (<script setup> 제외)
+- 각 \*.vue 파일은 한번에 최대 하나의 <script>블록을 포함할 수 있음 (<script setup> 제외)
 - 스크립트는 ES 모듈로 실행됨.
 - default export는 일반 객체 또는 defineComponent의 반환값으로 Vue 컴포넌트 옵션 객체여야함.
 ### <script setup>
-- 각 *.vue 파일은 한 번에 최대 하나의 <script setup> 블록을 포함할 수 있음.(normal<script>)제외
+- 각 \*.vue 파일은 한 번에 최대 하나의 <script setup> 블록을 포함할 수 있음.(normal<script>)제외
 - <script setup>은 사전에 처리되어 컴포넌트의 setup()함수로 사용됨. 
 - 즉, 컴포넌트의 각 인스턴스에 대해 실행됨. 
 - <script setup>의 최상위 바인딩은 템플릿에 자동 노출됨.
 ### <style>
-- 단일 *.vue파일에는 여러 <style>태그가 포함될 수 있음.
+- 단일 \*.vue파일에는 여러 <style>태그가 포함될 수 있음.
 - <style>태그는 현재 컴포넌트에 스타일을 캡슐화하는데 도움이 되도록 scoped 또는 module 속성을 가질 수 있음. 캡슐화 모드가 다른 여러 <style>태그를 동일한 구성 요소에서 혼합할 수 있음
 ## 전처리기
 - <script>의 lang 속성을 사용하여 전처리기 선언
