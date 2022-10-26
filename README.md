@@ -2619,4 +2619,230 @@ app.mount('#app');
 - ref는 특수속성. 이 ref 특수 속성을 통해 마운트 된 DOM 요소 또는 자식 컴포넌트에 대한 참조를 얻을 수 있음 !
 
 ## Ref 접근하기 
-- Composition API로 참조를 얻으려면 동일한 이름의 참조를 선언해야함.
+- Composition API로 참조를 얻으려면 동일한 이름의 참조를 선언해야함
+- 컴포넌트가 마운트 된 후에 접근 가능!!!
+- <template> 안에서 input으로 Refs참조에 접근하려는 경우 렌더링 되기 전에는 참조가 null 일 수 있음
+- <template> 안에서 $refs 내장 객체로 Refs 참조에 접근 가능
+
+```vue
+<template>
+	<div>
+		<!-- ref 속성 변수명 짓기 -->
+		<input ref="input" type="text" />
+		<p>{{ input }}</p>
+		<!-- 이상태에서 새로고침하면 null-> v-if로 마운트된 후 출력 -->
+		<p v-if="input">{{ input.value }}</p>
+		<!-- $ref 내장객체 사용 가능 -->
+		<p>{{ $refs.input.value }}, {{ $refs.input === input }}</p>
+	</div>
+</template>
+
+<script>
+import { onMounted, ref } from 'vue';
+export default {
+	setup() {
+		// ref 속성 동일한 변수 짓기
+		const input = ref(null);
+		// 돔 요소에 대한 참조는 마운트 이후 가능 -> onMounted()에서 접근 가능
+
+		onMounted(() => {
+			input.value.value = 'Hello World!';
+			console.log('onMounted: ', input.value);
+		});
+
+		return { input };
+	},
+};
+</script>
+
+<style lang="scss" scoped></style>
+```
+
+## v-for 내부 참조
+- v-for 내부에서 ref가 사용될 때 ref는 마우트 후 요소 배열로 채워짐
+```vue
+<template>
+	<ul>
+		<!-- // 마운트 된 후 itemRefs 안에 돔 요소 채워짐 -->
+		<li v-for="fruit in fruits" :key="fruit" ref="itemRefs">
+			{{ fruit }}
+		</li>
+		<!-- 함수 바인딩도 가능 -->
+		<li
+			v-for="fruit in fruits"
+			:key="fruit"
+			ref="(el)=>itemRefs.push(el.textContent)"
+		>
+			{{ fruit }}
+		</li>
+	</ul>
+</template>
+
+<script>
+import { onMounted, ref } from 'vue';
+export default {
+	setup() {
+		const list = ref([1, 2, 3]);
+		const fruits = ref(['사과', '딸기', '포도']);
+		// 마운트 된 후 itemRefs 안에 돔 요소 채워짐
+		const itemRefs = ref([]);
+
+		onMounted(() => {
+			itemRefs.value.forEach(item => console.log('item: ', item));
+		});
+		return {
+			list,
+			fruits,
+			itemRefs,
+		};
+	},
+};
+</script>
+<style lang="scss" scoped></style>
+```
+
+
+## 자식 컴포넌트로 접근하는 Refs
+- ref를 자식 컴포넌트에도 사용 가능.
+- ref로 자식 컴포넌트에 참조값을 얻게 되면 자식 컴포넌트의 모든 속성과 메서드에 대한 전체를 접근 가능
+- 이러한 경우 부모/자식 간 의존도가 생기므로 반드시 필요한 경우만
+- 일반적으로 ref보다 표준 props를 사용하며 부모/자식간 상호작용을 구현해야함 !
+
+```vue
+<!-- 부모 컴포넌트 -->
+<template>
+	<TemplateRefsChild ref="child"></TemplateRefsChild>
+</template>
+<script>
+import TemplateRefsChild from './TemplateRefsChild.vue'
+export default{
+	component:{
+		TemplateCHild,
+	},
+	setup(){
+		onMounted(()=>{
+			// 돔 요소에 대한 참조는 마운트 된 후
+			console.log(child.value);
+			child.value.sayHello();
+		})
+	}
+}
+</script>
+```
+
+## 부모 컴포넌트로 접근하는 $parent
+```vue
+<template>
+	<div>{{$parent}}</div>
+</template>
+```
+
+# \<script setup\>
+- \<script setup\>은 Single-File Component내에서 Composotion API를 사용하기 위한 syntactic sugar(문법적 설탕)임
+- cf)문법적 설탕 : 기능은 그대로인데 읽는 사람을 위해 직관적으로 쉽게 코드를 읽을 수 있게 만듬
+- SFC와 Composition API를 사용하는 경우 \<script setup\>을 사용하는 것을 권장.
+- 간결한 문법으로 상용구를 줄일 수 있음
+- 타입스크립트를 사용한 props와 emits 선언 가능
+- 런타임 성능의 향상 (템플릿이 setup 스크립트와 같은 scope에 있는 render함수로 컴파일 되므로 프록시가 필요 없음)
+- 더 뛰어난 IDE 타입 추론 성능
+
+```vue
+<script setup>
+import ChildComponent from '@components/ChildComponent.vue'; // component:{} 에 등록 필요 없어짐 !
+//아래 코드가 필요 없어짐..!! => setup(), return{} 필요 없음. 
+// export default{
+// setup(){
+// 		return {
+
+// 		}
+// 	}
+// }
+</script>
+```
+
+## defineProps() & defineEmits()
+- .eslintrc.cjs에서 설정해야 사용가능 
+```
+env:{
+	'vue/setup-compiler-macros':true, 
+}
+```
+- defineProps() 와 defineEmits() APIs를 <script setup> 내에 선언하여 props와 emits를 사용할 수 있음
+``` javascript
+<script setup>
+const props = defineProps({
+	foo: String
+})
+const emit = defineEmits(['change', 'delete'])
+</script>
+```
+- defineProps와 defineEmits는 <script setup> 내부에서만 사용할 수 있는 컴파일러 매크로. -> 그렇기 때문에 import 할 필요가 없으면 <script setup>이 처리될 때 컴파일 됨.
+- defineProps는 props 옵션과 동일한 값을 허용. 그리고 defineEmits는 emits 옵션과 동일한 값 허용
+- defineProps와 defineEmits에 전달받은 옵션을 기반으로 타입 추론을 제공
+- defineProps와 defineEmits에 전달된 옵션은 setup()에서 모듈 영역으로 호이스팅됨. 따라서 옵션을 setup()영역에 선언된 지역변수를 참조할 수 없음. 하지만 import 된 옵션을 사용할 수 있음. import도 모듈영역으로 호이스팅되기 떄문.
+
+## defineExpose()
+- script setup을 사용하는 컴포넌트는 기본적으로 Templat Refs나 $parent 같이 컴포넌트간 통신이 닫혀 있으.ㅁ
+- 명시적으로 노출하려면 defineExpose() 사용해야함.
+
+
+## useSlots() & useAttrs()
+- slots과 attrs는 <template> 내부에서 $slots와 $attrs로 직접 접근해서 사용. 
+- script setup 내부에선s useSlots(), userAttrs() helper 메서드 사용 가능
+```vue
+const slots = userSlots();
+const attrs = useAttrs();
+```
+
+## <script>와 <script setup> 함계 사용
+- <script setup>에서 표현할 수 없는 inheritAttrs 옵션이나 Plugin을 통해 활성화된 Custom옵션을 사용하고자 할때 normal<script>을 함께 선언
+- named export를 선언했을 때 (export const data)
+- 한 번만 실행되어야 하는 로직이 있을 때
+```vue
+<script>
+//일반 스크립트, 모듈 범위에서 한 번만 실행 -> 일반 스크립트는 한번만 실행됨
+runSideEffectOnce()
+//옵션 선언
+export default{
+	inheritAttrs: false, //NonProps 속성을 루트에 상속할 것인가?
+	customOptions: {}
+}
+</script>
+<script setup>
+// 각 인스턴스 생성 시 setup() 범위에서 실행됨
+</script>
+```
+
+## Top-level await
+- <script setup> 내의 top-level에서 await를 사용할 수 있음. 이러한 코드는 async setup()이렇게 컴파일 됨 
+
+# 동적 컴포넌트
+- 컴포넌트를 동적으로 변경하고 싶을 때 v-bind:is 속성을 사용해서 변경할 수 있음. 동적 컴포넌트는 탭 인터페이스와 같이 컴포넌트 간에 동적으로 전환해야할 떄 유용
+```vue
+<component :is="currentTabComponet"></component>
+```
+- :is 속성에 전달된 값은 다음 중 하나를 포함할 수 있음.
+- 등록된 컴포넌트의 문자열 이름 string
+- 실제 가져온 컴포넌트 객체 object
+
+```vue
+<template>
+	<button @click="changeCurrentComp(DynamicApple)">사과</button>
+	<button @click="changeCurrentComp(DynamicBanana)">바나나</button>
+	<hr/>
+	<component :is="currentComp"/>
+</template>
+
+<script setup>
+import DynamicApple from ''
+import DynamicBanana from ''
+//const currentComp = ref(DynamicApple);
+// is 속성으로 컴포넌트를 넘길 때는 shallowRef 함수로 넘기는게 퍼포먼스 유리
+const currentComp = shallowRef(DynamicApple); //속성에 대해서는 반응 x, 값 자체가 바뀌었을때만 반응 
+
+const obj = shallowRef({name : 김길동});
+obj.value = {}; //반응
+obj.value.name = ""; //반응X
+const changeCurrentComp = comp => (currentComp.value = comp);
+</script>
+```
