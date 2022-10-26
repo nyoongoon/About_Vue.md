@@ -1,6 +1,3 @@
-# About_Vue.md
-Vue를 사용하며 배운 내용을 기록하는 저장소입니다. 
-
 # 플러그인 설치
 
 - Korean Language Pack
@@ -1495,19 +1492,19 @@ export default {
 - 싱글 파일 컴포넌트(SFC)의 스펙과 다양한 기능들 
 ## 언어 블록
 ### <template>
-- 각 \*.vue 파일은한 번에 하나의 top-level <template>블록을 포함할 수 있음.
+- 각 *.vue 파일은한 번에 하나의 top-level <template>블록을 포함할 수 있음.
 - 콘텐츠는 추출되어 @vue/compiler-dom으로 전달되고, JavaScript 렌더 기능으로 사전 컴파일되고, render 옵션으로 내보내어 컴포넌트에 첨부됨.
 ### <script>
-- 각 \*.vue 파일은 한번에 최대 하나의 <script>블록을 포함할 수 있음 (<script setup> 제외)
+- 각 *.vue 파일은 한번에 최대 하나의 <script>블록을 포함할 수 있음 (<script setup> 제외)
 - 스크립트는 ES 모듈로 실행됨.
 - default export는 일반 객체 또는 defineComponent의 반환값으로 Vue 컴포넌트 옵션 객체여야함.
 ### <script setup>
-- 각 \*.vue 파일은 한 번에 최대 하나의 <script setup> 블록을 포함할 수 있음.(normal<script>)제외
+- 각 *.vue 파일은 한 번에 최대 하나의 <script setup> 블록을 포함할 수 있음.(normal<script>)제외
 - <script setup>은 사전에 처리되어 컴포넌트의 setup()함수로 사용됨. 
 - 즉, 컴포넌트의 각 인스턴스에 대해 실행됨. 
 - <script setup>의 최상위 바인딩은 템플릿에 자동 노출됨.
 ### <style>
-- 단일 \*.vue파일에는 여러 <style>태그가 포함될 수 있음.
+- 단일 *.vue파일에는 여러 <style>태그가 포함될 수 있음.
 - <style>태그는 현재 컴포넌트에 스타일을 캡슐화하는데 도움이 되도록 scoped 또는 module 속성을 가질 수 있음. 캡슐화 모드가 다른 여러 <style>태그를 동일한 구성 요소에서 혼합할 수 있음
 ## 전처리기
 - <script>의 lang 속성을 사용하여 전처리기 선언
@@ -1631,73 +1628,6 @@ export default{
 }
 ```
 
-## props 예시
-- 자식 컴포넌트에서 props옵션을 선언하고, 부모 컴포넌트에서 props 바인딩하여 채워넣는다 !!!
-- 자식 컴포넌트 AppCard.vue
-```vue
-<template>
-	<div class="card">
-		<div class="card-body">
-			<h5 class="card-title red">{{ title }}</h5>
-			<p class="card-text">
-				{{ contents }}
-			</p>
-			<a href="#" class="btn btn-primary">Go somewhere</a>
-		</div>
-	</div>
-</template>
-
-<script>
-export default {
-	props: ['title', 'contents'],
-	setup() {
-		return {};
-	},
-};
-</script>
-
-<styles></styles>
-```
-- 부모 컴포넌트 TheView.vue
-```vue
-<template>
-	<main>
-		<div class="container py-4">
-			<div class="row g-3">
-				<div v-for="post in posts" :key="post.id" class="col col-4">
-					<AppCard :title="post.title" :contents="post.contents"></AppCard>
-				</div>
-			</div>
-		</div>
-	</main>
-</template>
-
-<script>
-import AppCard from '@/components/AppCard.vue';
-import { reactive } from 'vue';
-export default {
-	components: {
-		AppCard,
-	},
-	setup() {
-		const post = reactive({
-			title: '제목2',
-			contents: '내용2',
-		});
-		const posts = reactive([
-			{ id: 1, title: '제목1', contents: '내용1' },
-			{ id: 2, title: '제목2', contents: '내용2' },
-			{ id: 3, title: '제목3', contents: '내용3' },
-			{ id: 4, title: '제목4', contents: '내용4' },
-			{ id: 5, title: '제목5', contents: '내용5' },
-		]);
-		return { post, posts };
-	},
-};
-</script>
-
-<style lang="scss" scoped></style>
-```
 
 ## props 객체 문법 선언
 ```javascript
@@ -1740,4 +1670,953 @@ export default{
  - 컴포넌트 인스턴스(this)의 $props객체로 접근 가능 (Options API)
 
  ## 객체를 사용하여 다중 속성 전달 
- 객체의 모든 속성을 
+ 객체의 모든 속성을 props로 전달하려는 경우 v-bind에 전달인자 없이 사용할 수 있음.
+ ```vue
+// 객체를 사용한 다중 속성 전달 (전달인자 없음)
+<BlogPost v-bind="post"/>
+<BlogPost :id="post.id" :title="post.title"/>
+ ```
+
+ ## **단반향 데이터 흐름**(중요)
+- 모든 props는 상위 속성과 -> 하위 속성 간에 단방향 바인딩으로 형성되어 있음.
+- 만약 상위 속성이 업데이트되면 -> 하위 속성도 업데이트 되지만 그 반대는 아님.
+- 이러한 성질은 하위 속성 변경 실수로 상위 속성을 변경하여 앱의 데이터 흐름을 이해하기 어렵게 만드는 것을 방지.
+- 또한 상위 컴포넌트가 업데이트 될 때마다 하위 컴포넌트의 모든 props는 최신 상태도 초기화 됨. 그렇기 때문에 자식 컴포넌트 내부에서 props를 변경하지 않아야함.
+```vue
+export default{
+	props:['title'],
+	setup(props){
+		// 자식컴포넌트 내부에서 props변경하면 안됨!
+		props.title = 'chagned title';
+	}
+}
+```
+- 일반적으로 props를 하위 컴포넌트에서 변경하고 싶은 두 가지 경우.
+- 
+- 1. prop은 초기값을 전달하는데 사용됨. 자식 컴포넌트에서 속성 값을 로컬 데이터 속성으로 사용하고자 할 때. 이 경우 prop을 초기값으로 사용하는 로컬 변수를 선언하는 것이 좋다.
+```javascript
+
+```
+- 2. 자식 컴포넌트에서 부모 컴포넌트로 이벤트를 올려서 변경... setup() 두번째 파라미터 context.emit() 사용
+
+
+## 객체 / 배열 Props 업데이트
+- 객체나 배열 같은 레퍼런스(참조)타입을 속성으로 전달 시 주의사항
+- 자식Comp에서 Props변경 하면 안되나, 자바스크립트 속성상 레퍼런스 타입의 속성은 변경할 수 있다.
+
+
+## Boolean Casting
+- Boolean 타입의 Props는 특별한 캐스팅 규칙이 있음.
+```javascript
+<!-- 자식 컴포넌트에서 Props 선언 -->
+export default{
+	props:{
+		disabled: Boolean
+	}
+}
+```
+
+```vue
+<!-- 부모 컴포넌트 --> 
+<!-- :disabled="true" 전달하는 것과 동일. -->
+<MyComponent disabled />
+<!-- :disabled="false" 전달하는 것과 동일. -->
+<MyComponent />
+```
+
+
+## props 예시
+- 자식 컴포넌트에서 props옵션을 선언하고, 부모 컴포넌트에서 props 바인딩하여 채워넣는다 !!!
+- 자식 컴포넌트 AppCard.vue
+```vue
+<template>
+	<div class="card">
+		<div class="card-body">
+			<!-- type: new, notice -->
+			<span class="badge bg-secondary">{{ typeName }}</span>
+			<h5 class="card-title red mt-2">{{ title }}</h5>
+			<p class="card-text">
+				{{ contents }}
+			</p>
+			<!-- props->setup에서 computed로 처리하여 한줄로 변경 가능 -->
+			<!-- <a v-if="isLike" href="#" class="btn btn-danger">좋아요</a>
+			<a v-else href="#" class="btn btn-outline-danger">좋아요</a> -->
+			<a href="#" class="btn" :class="isLikeClass">좋아요</a>
+			<br />
+			<!-- 부모에서 받음-->
+			{{ obj }}
+		</div>
+	</div>
+</template>
+
+<script>
+import { computed } from 'vue';
+export default {
+	props: {
+		type: {
+			type: String,
+			default: 'news',
+			validator: value => {
+				//유효성 검사 !
+				return ['news', 'notice'].includes(value);
+			},
+		},
+		title: {
+			type: String,
+			required: true,
+		},
+		contents: {
+			type: String,
+			required: true,
+		},
+		isLike: {
+			type: Boolean,
+			default: false,
+		},
+		obj: {
+			type: Object,
+			default: () => ({}),
+		},
+	},
+	emits: ['toggleLike'],
+	setup(props, context) {
+		console.log('props.title: ', props.title);
+		const isLikeClass = computed(() =>
+			props.isLike ? 'btn-danger' : 'btn-outline-danger',
+		);
+		const typeName = computed(() =>
+			props.type === 'news' ? '뉴스' : '공지사항',
+		);
+		const toggleLike = () => {
+			//props.isLike = !pros.isLike; 자식컴포넌트에서 props 변경불가
+			// 이벤트를 부모 컴포넌트로 올리기
+			context.emit('toggleLike');
+
+			//자바스크립트 특성상 obj속성 변경 가능
+			props.obj.title = '김길동'; // 가능하지만 사용하면 안됨 (부모컴포넌트 속성은 이벤트를 올려서 수정해야함 !)
+		};
+		return { isLikeClass, typeName, toggleLike };
+	},
+};
+</script>
+
+<styles></styles>
+```
+
+- 부모 컴포넌트 TheView.vue
+```vue
+<template>
+	<main>
+		<div class="container py-4">
+			<div class="row g-3">
+				<div v-for="post in posts" :key="post.id" class="col col-4">
+					<AppCard
+						:title="post.title"
+						:contents="post.contents"
+						:type="post.type"
+						:is-like="post.isLike"
+						@toggle-like="post.isLike = !post.isLike"
+						:obj="obj"
+					></AppCard>
+					<!-- 자식컴포넌트에서 context.emit()으로 보낸 이벤트 받기-->
+				</div>
+			</div>
+		</div>
+	</main>
+</template>
+
+<script>
+import AppCard from '@/components/AppCard.vue';
+import { reactive } from 'vue';
+export default {
+	components: {
+		AppCard,
+	},
+	setup() {
+		const post = reactive({
+			title: '제목2',
+			contents: '내용2',
+		});
+		const posts = reactive([
+			{ id: 1, title: '제목1', contents: '내용1', isLike: true, type: 'news' },
+			{ id: 2, title: '제목2', contents: '내용2', isLike: true, type: 'news' },
+			{ id: 3, title: '제목3', contents: '내용3', isLike: true, type: 'news' },
+			{
+				id: 4,
+				title: '제목4',
+				contents: '내용4',
+				isLike: false,
+				type: 'notice',
+			},
+			{
+				id: 5,
+				title: '제목5',
+				contents: '내용5',
+				isLike: false,
+				type: 'notice',
+			},
+		]);
+		// 단방향 바인딩 꺠는 예시.
+		const obj = reactive({
+			title: '제목2',
+			contents: '내용2',
+		});
+
+		return { post, posts, obj };
+	},
+};
+</script>
+
+<style lang="scss" scoped></style>
+
+```
+# Events
+- 자식 컴포넌트에서 부모 컴포넌트로 데이터를 전달 또는 트리거의 목적으로 이벤트를 내보내는 것을 말함. 
+- 이벤트는 컴포넌트의 emit 메서드를 통하여 발생시킬 수 있음.
+- 부모 컴포넌트 <= 데이터 전달 또는 트리거 <= 자식 컴포넌트
+
+## 이벤트 주의사항
+- **이벤트는 선언하는 것이 좋음**
+- 컴포넌트의 문서화를 더 잘하기 위해서. 
+- NonProps(fallthrough속성)에서 제외하기 위해서
+- -> 선언을 하지 않으면 우리가 추가한 이벤트가 NonProps 속성에 추가 됨.
+- 자식 컴포넌트 MyButton.vue
+```vue
+<template>
+	<div class="p-3 bg-danger">
+		<button class="btn btn-primary" type="button" @click="handler">
+			My Buttons
+		</button>
+	</div>
+</template>
+
+<script>
+export default {
+	setup(props, { emit }) {
+		// 이벤트 emit 옵션으로 선언하지 않은 상태
+		// NonProps 속성상 정의되지 않은 Prop이나 이벤트는 루트엘리먼트에 상속됨
+		const handler = () => {
+			emit('SayHello');
+		};
+		return { handler };
+	},
+};
+</script>
+
+<style lang="scss" scoped></style>
+```
+- 부모 컴포넌트 MyButtonParent.vue
+``` vue
+<template>
+	<div>
+		<!-- 자식 컴포넌트에서 emit 객체로 SayHello이벤트를 등록해두지 않았기 떄문에. emit()으로 받은 이벤트가 다시 자식으로 상속됨!!! -->
+		<MyButton @say-hello="sayHello"></MyButton>
+	</div>
+</template>
+
+<script>
+import MyButton from '@/components/MyButton.vue';
+export default {
+	components: { MyButton },
+	setup() {
+		const sayHello = () => {
+			alert('say hello !');
+		};
+		return { sayHello };
+	},
+};
+</script>
+
+<style lang="scss" scoped></style>
+```
+
+## 이벤트 발생 및 수신
+- 컴포넌트의 <template> 블록 안에서 내장 함수 $emit()을 사용하여 직접 커스텀한 이벤트를 내보낼 수 있음.
+- 또는 setup()의 두번째 파라미터인 context객체의 emit() 사용가능.
+```vue
+<template>
+	<button @click="$emit('someEvent')">버튼</button>
+</template>
+```
+- 그러면 부모 컴포넌트에서 v-on(또는 @)을 사용하여 이벤트를 수신할 수 있음.
+<MyComponent @some-event="callFunction">
+- .once 수식어는 컴포넌트 커스텀 이벤트에서도 지원됨
+```vue
+<MyComponent @some-event.once="callFunction"/>
+```
+
+## 이벤트 선언하기 
+- Vue3에서는 emits 옵션을 사용하여 이벤트를 선언할 수 있음.
+- 2가지 선언 방법 : 1. 문자열 배열 선언, 2. 객체 문법 선언
+
+### 객체 문법으로 선언 이벤트
+- 객체 문법으로 선언할 경우 validation 로직을 추가할 수 있음.
+- 만약 validation이 없다면 null로 설정.
+
+```javascript
+export default{
+	emits:{
+		//유효성 검사가 없는 이벤트 선언
+		someEvent: null,
+		// 유혀성 검사가 있는 이벤트 선언
+		someSubmit:(result) =>{
+			if(email && password){
+				return true
+			}else{
+				console.warn('result 값이 비어 있습니다!')
+				return false
+			}
+		}
+	},
+	setup(props, context){
+		context.emit('someEvent', 'Hello World!')
+	}
+}
+```
+
+## 사용자 정의 v-model 만들기
+- 컴포넌트를 만든 후 해당 컴포넌트에 사용자 정의 v-model을 적용하려면 @update:modelValue 이벤트를 사용하여 v-model을 만들 수 있음.
+- 자식컴포넌트 LabelInput.vue
+```vue
+<template>
+	<label>
+		{{ label }}
+		<intput
+			:value="modelValue"
+			@input="event => $emit('update:modelValue', event.target.value)"
+			type="text"
+		/>
+	</label>
+</template>
+
+<script>
+export default {
+	props: ['modelValue', 'label'], // props, emit 생성하여 부모컴포넌트에서 사용자 정의 v-model 사용 가능해짐
+	emit: ['update:modelValue'],
+	setup() {
+		return {};
+	},
+};
+</script>
+
+<style lang="scss" scoped></style>
+```
+- 부모 컴포넌트 TheView.vue
+```vue
+<template>
+<!-- <LabelInput :model-value="username" @update:model-value="value=>(username=value)"></LabelInput>-->
+	<LabelInput v-model="username" label="이름"></LabelInput>
+</template>
+<script>
+import LabelInput from '@/components/LabelInput.vue';
+import { reactive, ref } from 'vue';
+export default {
+	components: {
+		LabelInput,
+	},
+	setup() {
+		const username = ref('');
+		return { username };
+	}
+}
+
+</script>
+```
+
+## Computed 이용하기
+- 컴포넌트 안에서 computed를 사용하여 v-model을 구현할 수 있음. 
+- computed는 읽기 전용이지만, getter,setter 정의하면 쓰기도 가능한 점을 이용 !
+```vue
+<template>
+	<label>
+		{{ label }}
+		<!-- <intput
+			:value="modelValue"
+			@input="event => $emit('update:modelValue', event.target.value)"
+			type="text"
+		/> -->
+		<input v-model="value" type="text" />
+	</label>
+</template>
+
+<script>
+import { computed } from 'vue';
+export default {
+	props: ['modelValue', 'label'], // props, emit 생성하여 부모컴포넌트에서 사용자 정의 v-model 사용 가능해짐
+	emit: ['update:modelValue'],
+	setup(props, { emit }) {
+		const value = computed({
+			get() {
+				return props.modelValue;
+			},
+			set(value) {
+				emit('update:modelValue', value);
+			},
+		});
+		return { value };
+	},
+};
+</script>
+
+<style lang="scss" scoped></style>
+```
+
+## v-model 전달인자
+- 기본적으로 v-model은 컴포넌트에서 modelValue props와 update:modelValue 이벤트로 사용. 하지만 전달인자(Arguments)를 사용하여 이러한 이름을 수정할 수 있음.
+```javascript
+//부모컴포넌트
+<!--<BookComponent v-model="bookTitle"> 기존 코드-->
+<BookComponent v-model:title="bookTitle">
+```
+
+- 이 경우 자식 컴포넌트에서는 :title을 속성으로 정의하고 update:title로 이벤트를 내보내야함.
+
+```vue
+<template>
+	<article>
+		<strong>책 이름</strong>:
+		<input
+		type="text"
+		:value="title"
+		@input="$emit('update:title', $event.target.value)"
+		/>
+	</article>
+</template>
+<script>
+export default{
+	props: ['title'],
+	emits:['update:title'],
+};
+</script>
+```
+
+## 다중 v-model 바인딩
+- v-model 전달인자를 사용하여 컴포넌트에 여러 v-model을 바인딩할 수 있음
+
+```javascript
+<BookComponent
+	v-model:title="bookTitle"
+	v-model:author="bookAuthor"
+/>
+```
+
+```vue
+<template>
+	<article>
+		<strong>책 이름</strong>:
+		<input
+		type="text"
+		:value="title"
+		@input="$emit('update:title', $event.target.value)"
+		/>
+		<br/>
+		<!-- 다른 표현 방식 -->
+		<strong>저자</strong>:
+		<input
+		type="text"
+		model-value="author"
+		@update:model-value="value => $emit('update:author', value)"
+		>
+	</article>
+</template>
+<script>
+export default{
+	props: ['title', 'author'],
+	emits:['update:title', 'update:author'],
+};
+</script>
+```
+
+# Non-Prop 속성(fallthrough 속성)
+- Non-Prop 속성은 props 또는 event에 명시적으로 선언되지 않은 속성 또는 이벤트.
+- class, style, id와 같은 것이 있음.
+
+## 속성 상속
+- 컴포넌트가 단일 루트 요소로 구성되어 있으면 fallthrough 속성은 루트 요소의 속성에 자동으로 추가됨.
+- 자식 컴포넌트 MyButton.vue 
+```javascript
+<template>
+	<button>click me</button>
+</template>
+```
+- 부모 컴포넌트 
+```javascript
+<MyButton class="large">
+```
+- 최종 렌더링 된 DOM (속성 상속함)
+```
+<button class="large">click me</button>
+```
+
+## class, style 속성 병합, 다른 속성(id속성)은 덮어씌워짐
+- class와 sylte이 아닌 속성들 (ex-id 속성)은 덮어씌워진다. 
+- 만약 자식 컴포넌트 루트 요소에 이미 class와 style 속성이 정의되어 있으면, 부모로 받은 class와 style 속성과 병합함.
+```javascript
+// 자식 컴포넌트
+<button class="btn">click me</button>
+```
+```javascript
+// 속성 병합된 자식 컴포넌트
+<button class="btn larget">click me</button>
+```
+
+## v-on 이벤트 리스너 상속
+- v-on 이벤트 리스너도 동일하게 상속됨.
+```
+<MyButton @click="onClick"/>
+```
+- @click 리스너는 <MyButton>의 컴포넌트 루트요소인 <button>요소에 추가됨.
+- 만약 <button> 요소에 이미 바인딩된 이벤트가 있다면 이벤트가 추가되어 두 리스너 모두 트리거 됨.
+
+## 속성 상속 비활성하
+- 컴포넌트가 자동으로 Non-Prop 속성을 상속하지 않도록 하려면 컴포넌트의 inheritAttrs: false 옵션을 설정할 수 있음.
+```vue
+<template>
+	<button class="btn" data-link="hello">click me</button>
+</template>
+<script>
+export default{
+	inheritAttrs: false,
+};
+</script>
+```
+- 컴포넌트에 Non-Prop 속성을 비활성화 하는 일반적인 경우는 자식 컴포넌트의 루트요소 이외에 다른 요소에 Non-Prop 속성을 적용하고 싶을 때.
+- ex)
+```javascript
+// 자식컴포넌트의 루트요소가 div라서 상속 비활성
+<template>
+// 비활성하지 않으면 div가 상속 받는다 -> 하지만 div의 자식태그인 button도 상속 x -> 내장 객체인 $attrs사용(v-bind)
+	<div> 
+		<button v-bind="$attrs">my button</button>
+	</div>
+</template>
+<script>
+	export default{
+		inheritAttrs: false,
+		setup(props, context){
+			context.attrs;
+			return {};
+		}
+	}
+</script>
+```
+
+- 그리고 적용해야하는 요소에 <template> 에서 Non-Prop 속성에 접근할 수 있는 내장 객체 $attrs로 직접 접근 가능.
+```javascript
+<template>
+	<p>fallthrough 속성 : {{$attrs}}</p>
+</template>
+```
+- $attrs 객체는 컴포넌트에 선언되지 않은 모든 속성 props, emits (예 : class, style, v-on등)을 포함.
+- 참고사항
+- props와 달리 Non-Prop 속성은 Javascript에서 원래 대소문자를 유지하므로 foo-bar와 같은 속성은 $attrs['foo-bar']로 접근해야함.
+- @click과 같은 v-on 리스너는 $attrs.onClick과 같이 함수로 접근. 
+
+## Fragments
+- Vue3에서 컴포넌트는 다중 루트 노드 컴포넌트인 fragments를 공식 지원
+### Vue2 문법
+- Vue2에서는 다중 루트 컴포넌트가 지원되지 않았고, 사용자가 실수로 다중 루트 컴포넌트를 만들었을 경우 경고메시지를 내보냈었음.
+- 이 오류를 해결하기 위해 많은 컴포넌트가 단일 <div>로 감싸게 됐었음.
+```html
+<template>
+	<div>
+		<header></header>
+		<main></main>
+		<footer></footer>
+	</div>
+</template>
+```
+### Vue3 문법
+- Vue3에서 컴포넌트는 다중 루트 노드를 가질 수 있음. 하지만, 개발자가 속성을 배포(상속)해야하는 위치를 명시적으로 정의해야함.
+```vue
+<template>
+	<header></header>
+	<main v-bind="$attrs"></main>
+	<footer></footer>
+</template>
+```
+
+# Slots
+- slot을 사용하여 컴포넌트에 컨텐츠 전달 가능. 
+- 컨텐츠는 태그 사이에 들어가는 값 -> <tag> contents </tag>
+- \<slot\> 요소는 **부모 컴포넌트에서 제공하는 콘텐츠**를 나타내는 슬롯 콘텐츠. 슬롯은 텍스트 뿐만아니라 HTML요소, 컴포넌트 등 다양한 모든 콘텐츠가 될 수 있음.
+- 예시)  FancyButton.vue 자식 컴포넌트.
+```vue
+<template>
+	<button class="fancy-btn">
+		<slot></slot>>
+	</button>
+</template>
+```
+- 부모 컴포넌트
+```vue
+<FancyButton>
+	<span style="color: red"> Click me </span>
+	<i>!</i>
+</FancyButton>
+```
+
+## Fallbock Content
+- 상위 컴포넌트에서 슬롯 콘텐츠가 제공되지 않을 때 슬롯에 대한 폴백(기본 콘텐츠)을 지정할 수 있음.
+- 예시)  FancyButton.vue 자식 컴포넌트.
+```javascript
+<template>
+	<button class="btn">
+		<slot>Default Click !</slot>
+	</button>
+</teplate>
+```
+## Named Slots
+- \<slot\> 요소에 이름을 부여하는 여러개의 \<slot\>을 정의할 수 있음.
+```vue
+<!-- BaseCard.vue -->
+<template>
+	<article>
+		<div>
+			<slot name="header"></slot>
+		</div>
+		<div>
+			<slot></slot>
+		</div>
+		<div>
+			<slot name="footer"></slot>
+		</div>
+	</article>
+</template>
+```
+
+- <slot>에 name 속성을 부여하여 특정 슬롯 콘텐츠가 렌더링 되어야할 위치를 설정할 수 있음
+- name이 없는 <slot>의 이름은 암시적으로 default임.
+```vue
+<!-- 부모 컴포넌트 -->
+<template>
+	<BaseCard>
+		<template v-slot:header>제목</template>
+		<!-- <template v-slot:default>안녕하세요</template> -->
+		<!-- default슬롯은 암시적으로 그냥 사용 가능 -->
+		안녕하세요
+		<!-- 단축표현 # -->
+		<template #footer>푸터</template> 
+	</BaseCard>
+</template>
+```
+
+## slot 전달인자 동적으로 변경 가능
+
+``` vue
+<!-- 부모 컴포넌트 -->
+<template>
+	<BaseCard>
+		<!-- #[]안에 동적인 변수 전달 -->
+		<template #[slotArgs]>제목</template>
+	</BaseCard>
+</template>
+
+<script>
+// ...
+setup(){
+	const slotArgs = ref('header');
+	return {slotArgs};
+}
+</script>
+```
+
+## Render Scope
+- 슬롯 콘텐츠는 상위 컴포넌트에 정의되어 있으므로 상위 컴포넌트의 데이터 영역에 접근은 가능하지만 하위 컴포넌트의 영역에는 접근할 수 없음.
+
+### Scoped Slots
+- Render Scope에서 업급했던 것처럼 슬롯 콘텐츠는 자식 컴포넌트의 데이터에 접근할 수 없음.
+- 하지만 슬롯 콘텐츠에서 상위 컴포넌트와 하위 컴포넌트 데이터를 모두 사용할 수 있다면 개발할 때 유용
+- 이러한 방법으로 자식 컴포넌트에서 \<slot\> 요소를 사용할 때 props전달하는 것처럼 속성을 슬롯 콘텐츠에 전달할 수 있음. 
+- 자식 컴포넌트
+```vue
+<template>
+	<slot></slot>
+</template>
+
+<script>
+import {ref} from 'vue';
+export default{
+	setup(){
+		const childMessage = ref('자식 메시지');
+		return {childMessage};
+	}
+}
+</script>
+```
+
+- 부모 컴포넌트
+```vue
+<template #default>
+	{{message}} {{childMessage}} // 현재 자식 컴포넌트의 변수 접근x
+</template>
+<script>
+import {ref} from 'vue';
+export default{
+	setup(){
+		const message = ref('부모 메시지');
+		return {message};
+	}
+}
+</script>
+```
+- Scoped Slots 사용하여 Props 전달하는 것처럼 상위 컴포넌트로 전달 가능 !
+- Scoped Slots 적용 자식 컴포넌트
+```vue
+<template>
+	<slot :child-message="childMessage"></slot>
+</template>
+
+<script>
+import {ref} from 'vue';
+export default{
+	setup(){
+		const childMessage = ref('자식 메시지');
+		return {childMessage};
+	}
+}
+</script>
+```
+- Scoped Slots 받는 부모 컴포넌트
+```vue
+<template #default="obj"> // 객체에 담겨서 옴
+<!-- <template #default="{childMessage}"> --> 구조분해할당도 가능 !!!
+	{{message}} {{obj.childMessage}} // 현재 자식 컴포넌트의 변수 접근 가능 !!!
+</template>
+<script>
+import {ref} from 'vue';
+export default{
+	setup(){
+		const message = ref('부모 메시지');
+		return {message};
+	}
+}
+</script>
+```
+
+
+## $slots 내장 객체와 context.slots을 활용한 computed 처리
+- 부모컴포컨트에서 slots 값 내려주지 않으면 출력 안하기
+- $slots 내장객체 이용하여 부모로부터 받은 값이 없으면 출력안하기 조건문 작성 가능
+- 자식 컴포넌트
+```vue
+<template>
+	<article>
+		<!--  부모에서 header slots 값을 주지 않으면 출력x-->
+		<div v-if="$slots.header"> 
+			<slot name="header"></slot>
+		</div>
+		<div>
+			<slot></slot>
+		</div>
+		<!--  부모에서 footer slots 값을 주지 않으면 출력x-->
+		<div v-if = "hasFooter">
+			<slot name="footer"></slot>
+		</div>
+	</article>
+</template>
+<script>
+export default{
+	//setup(props, context){
+	setup(props, {slots}){
+		// setup함수 context 객체에서 slots 접근 가능 -> computed 활용 가능
+
+		const hasFooter = computed(()=>  !!slots.footer	) //느낌표 두개 자바스크립트 문법..?
+		
+		return {hasFooter};
+	}
+}
+</script>
+```
+
+# Provide / Inject (Prop Drilling 해결)
+- 부모 컴포넌트 -> Props / 데이터 전달 -> 자식 컴포넌트
+- 부모 컴포넌트와 자식컴포넌트 사이에 많은 중간 컴포넌트들이 끼어 있다면 ? -> 두 컴포넌트 사이에 모든 컴포넌트들에 Props 전달해야하므로 굉장히 번거로움
+- 중간에 있는 컴포넌트들은 단순히 하위 컴포넌트에 Props를 전달하기 위해 Props를 선언하고 사용해야함. -> 이를 Prop Drilling이라 함(단순 Props 전달의 목적)
+- =>> 이 Prop Drilling 을 해결하기 위한 것이 "Provide / Inject"
+
+## Provide
+- 하위 컴포넌트 항목에 데이터를 제공하여면 provider 역할을 하는 상위 컴포넌트 setup()함수 내부에서 provide()함수를 사용하여 데이터를 제공
+```javascript
+import { provide} from 'vue';
+export default{
+	setup(){
+		provide('message', 'hello!');
+	},
+};
+```
+- provide() 함수는 두 개의 파라미터를 받음
+- 첫번째 파라미터는 주입 키 : 문자열 또는 Symbol이 될 수 있음. 주입 키는 하위 컴포넌트에서 주입된 값을 조회하는 데 사용됨.
+- 두번째 파라미터는 제공된 값: 값은 refs와 같은 반응성 데이터를 포함하여 모든 유형이 될 수 있음.
+- 부모 컴포넌트 provide 예시
+```javascript
+import {provide, ref} from 'vue';
+export default{
+	setup(){
+		const message = 'Hello World!';
+		provide('static-message', message);
+		return {
+			message,
+		};
+	},
+}
+```
+- 자식 컴포넌트 inject 예시
+
+```javascript
+import {inject} from 'vue';
+export default{
+	setup(){
+		const staticMessage = inject('static-message', 'defaultMessage'); // 두번째 파라미터에 디폴트 값지정(provide 값 없는 경우)
+		return {
+			staticMessage,
+		};
+	},
+}
+```
+
+## Reactivity 
+- Provide / Inject를 반응성 데이터로 제공할 때 가능한 모든 변경을 Provider 내부에서 하는 것이 좋음 -> 유지관리 용이
+- 만약 injector 내부 컴포넌트에서 반응성 데이터를 변경해야하는 경우 데이터 변경을 제공하는 함수를 함께 제공하는 것이 좋다. 
+```javascript
+//Provider
+const message = ref('Hello World!');
+const updateMessage = () => { // 데이터 변경 함수 함꼐 제공
+	message.value = 'world!';
+}
+provide('message', {message, updateMessage});
+```
+```javascript
+//Injector
+const{message, updateMessage} = inject('message');
+```
+- 주입된 컴포넌트에서 제공된 값을 변경할 수 없도록 하여면 readonly()함수 사용가능.
+```vue
+import {provide, readonly, ref} from 'vue';
+provide('count', readonly(count));
+```
+
+## Symbol 키 사용
+- 대규모 애플리케이션에서 다른 개발자와 함께 작업할 때 잠재적 충돌을 피하기 위해 Symbol 주입 키를 사용하는 것이 가장 좋음
+```javascript
+//key.js
+export const myInjectionKey = Symbol()
+```
+```javascript
+// in provider component
+import {provide} from 'vue'
+import {myInjectionKey} from './keys.js'
+provide(myInjectionKey, {
+	/* data to provide */
+});
+```
+```javascript
+import {inject} from 'vue'
+import {myInjectionKey} from './keys.js'
+const injected = inject(myInjectionKey)
+```
+
+## App-level Provide
+- 컴포넌트에서 데이터를 제공하는 것 외에도 App-level에서 제공할 수도 있음.
+```javascript
+import {createApp} from 'vue';
+import App from './App.vue';
+const app = createApp(App);
+app.provide('appMessage', 'Hello app message');
+app.mount('#app');
+```
+
+### App-level에서의 Provide / Inject 사용 예
+- App-level에서의 Provide는 앱에서 렌더링되는 모든 컴포넌트에서 사용가능. Plugin작성할때 유용
+- Vue2에서 컴포넌트 인스턴스 객체를 추가할때 global property에 추가하여 this로 접근했으나, Vue3에서 Composition API Setup 함수에서는 컴포넌트 인스턴스에 this 접근할 수 없음.(this  생성 전 라이플 사이클이기 때문)
+-  -> 이때 때신 Provide / Inject 사용 가능.
+
+# Lifecycle Hooks
+- 라이프사이클 훅은 각 라이프사이클단계에서 사용자가 프로그래밍 코드를 추가할 수 있는 함수를 말함.
+- Creation(생성) -> Mounting(장착) -> Updating(변경) -> Destruction(소멸)
+
+## 라이프사이클 순서
+1. setup() <- Composition API
+2. beforeCreate()
+3. created()
+4. beforeMount()
+5. mounted()
+6. beforeUpdate()
+7. updated()
+8. beforeUnmount()
+9. unmounted()
+
+### Compotision API에서 사용
+- beforeCreate, created 를 제외하고(필요하지 않음) -> 두 훅에서 사용하고 싶었던 함수를 그냥 setup()내부에서 사용하면 됨.
+- setup 내부에서 사용 가능 
+
+### Creation
+- 컴포넌트 초기화 단계이며 Creation Hooks 은 라이프 사이클 단계에서 가장 먼저 실행됨.
+- 아직 컴포넌트가 DOM에 추가되기 전이므로 DOM에 접근할 수 없다.
+- 서버렌더링에 지원되는 단계
+- 클라이언트나 서버 렌더 단에서 처리해야할 일이 있으면 이 단계에서 진행
+
+### beforeCreate
+- 컴포넌트 인스턴스가 초기화 될 때 실행됨.
+- data() 또는 computed와 같은 다른 옵션을 처리하기 전에 측시 호출됨.
+
+### created
+- 컴포넌트 인스턴스가 초기화를 완료한 후 호출 되는 훅
+
+### setup
+- Composition API의 setup() 혹은 Opions API 훅 보다 먼저 호출됨.
+- beforeCreate와 created 라이프사이클 훅은 OptionsAPI에서 사용되는 라이프사이클 훅으로 Vue3 Composition API를 활용하여 개발을 진행할 때는 setup()함수로 대체할 수 있음.
+
+### Mounting
+- DOM에 컴포넌트를 삽입하는 단계. onBeforeMount와 onMounted가 있음
+- 서버 렌더링에서 지원되지 않음
+- 초기 렌더링 직전에 돔을 변경하고자 한다면 이 단계에서 활용할 수 있음.
+#### onBeforeMount
+- 컴포넌트가 마운트되기 직전에 호출됨
+- 대부분의 경우 사용을 권장하지 않음
+- -> onBeforeMount와 onMounted사이에서 자식 컴포넌트가 생성, onMounted까지 완료됨.
+#### onMounted
+- 컴포넌트가 마운트된 후에 호출 됨. DOM에 접근 가능.
+- 모든 자식 컴포넌트가 마운트되었음을 의미.
+- 자체 DOM 트리가 생성되어 상위 컴포넌트에 삽입되었음을 의미함.
+
+### Updating
+- 반응형 데이터가 변경되어 DOM에 업데이트 되려고 할 떄 호출
+- 컴포넌트에서 사용되는 반응형 데이터가 변경되었거나 어떠한 이유로 **재렌더링**이 발생될 때 호출.
+- 디버깅이나 프로파일링 등을 위해 컴포넌트 재렌더링 시점을 알고 싶을 때 사용.
+
+
+#### onBeforeUpdate
+- 반응형 상태변경으로 인해 컴포넌트가 DOM 트리를 업데이트하기 직전에 호출됨.
+- 컴포넌트에서 사용되는 반응형 상태 값이 변해서, DOM에도 그 변화를 적용시켜야할 때가 있음.
+- 이때, 변화 직전에 호출되는 것이 바로 onBeforeUpdate 훅. 
+
+#### onUpdated
+- 반응 상태 변경으로 인해 컴포넌트가 DOM 트리를 업데이트한 후에 호출됨.
+- 상위 컴포넌트의 onUpdated 훅은 하위 컴포넌트의 훅 이후에 호출됨(Child-> Parent)
+- 이 훅은 다른 상태변경으로 인해 발생할 수 있는 컴포넌트의 DOM 업데이트 후에 호출됨. 
+- 특정 상태 변경 후에 업데이트된 DOM에 엑세스 해야하는 경우 대신 nextTick()을 사용 
+- 경고) onUpdated훅에서 컴포넌트의 상태를 변경하면 무한 업데이트 루프가 발생할 수 있음.
+
+### Destruction
+- 해체(소멸)단계이며 onBeforeUnmount 와 onUnmounted가 있음. 
+
+#### onBeforeUnmount
+- 컴포넌트가 마운트 해제되기 직전에 호출됨
+
+#### onUnmounted
+- 컴포넌트가 마운트 해제된 후 호출됨.
+
+
+# Template Refs
+- 뷰에서 DOM에 직접 접근할떄 사용하는 템플릿 참조
+- Vue의 선언적 렌더링 모델은 대부분의 직접적인 DOM의 작업을 대신 수행.
+- 하지만 때론 기본 DOM요소에 직접 접근해야하는 경우가 있을 수 있음.
+- -> 이때 ref 특수 속성을 사용해서 쉽게 접근 가능
+```vue
+<input type="text" ref="input"/>
+```
+- ref는 특수속성. 이 ref 특수 속성을 통해 마운트 된 DOM 요소 또는 자식 컴포넌트에 대한 참조를 얻을 수 있음 !
+
+## Ref 접근하기 
+- Composition API로 참조를 얻으려면 동일한 이름의 참조를 선언해야함.
