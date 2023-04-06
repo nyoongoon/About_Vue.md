@@ -267,7 +267,7 @@ alias: {
 ``` javascript
 export default{
   const reactiveMessage = ref('Hello Reactive Message'); 
-  const addReactiveMessage= () =>{ //실행되면 '!'가 추가 안됨
+  const addReactiveMessage= () =>{ //실행되면 '!'가 추가됨
     reactiveMessage.value = reactiveMessage.value + '!';
   };
 
@@ -407,7 +407,7 @@ const state = reactive({count: 0 })
 import { reactive } from 'vue';
 
 export default {
-	//옵션s API에서는 반응형 객체를 생성할 때, data() 옵션의 객체를 리턴해서 선언했었음. -> 반환된 객체는 내부적으로 reactive()에 감싸져 나온 것
+	//옵션s API에서는 반응형 객체를 생성할 때, data 옵션의 객체를 리턴해서 선언했었음. -> 반환된 객체는 내부적으로 reactive()에 감싸져 나온 것
 	// data() {
 	// 	return {};
 	// },
@@ -480,7 +480,7 @@ export default {
 const count = ref(0)
 const state = reactive({count}) //reactive({count:count}) 인 상황 (키와 값이 같으면 단축가능)
 count.value++
-console.log(vount.value)//1
+console.log(count.value)//1
 console.log(state.count)//1  <-- state.count.value가 아님 !
 ```
 
@@ -488,7 +488,7 @@ console.log(state.count)//1  <-- state.count.value가 아님 !
 - 반응형 객체와 달리 ref가 반응형 배열 또는 Map과 같은 기본 컬렉션 타입의 요소로 접근될 때 수행되는 래핑 해제가 없음.
 ```javascript
 const books = reactive([ref('Vue 3 Guide')])
-console.log(bools[0].value) //value 속성 필요 !
+console.log(books[0].value) //value 속성 필요 !
 const map = reactive(new Map([['count', ref(0)]]))
 console.log(map.get('count').value) //value 속성 필요 !
 ```
@@ -674,7 +674,8 @@ export default {
 ```
 
 
-# 조건부 렌더링(v-if, v-show)## v-if
+# 조건부 렌더링(v-if, v-show)
+## v-if
 - v-if 디렉티브는 조건부로 블록을 렌더링할 때 사용. 
 - v-else 디렉티브는 v-if가 거짓 일때 렌터링하는 블록
 - v-else-if는 v-if에 대한 else if 블록
@@ -689,7 +690,7 @@ export default {
 ## v-if VS v-show
 - v-if는 실제로 렌더링 됨. 전환할 때 블록 내부의 컴포넌트들이 제거되고 다시 생성되기 때문.
 - 또한 v-if는 게으름. 초기 렌더링 시, 조건이 거짓이면 아무작업도 하지 않음. 조건부 블록은 조건이 처음으로 참이 될때까지 렌더링하지 않음. 
-- 이에 비해 v-show는 훨씬 간단. 초기조건과 관계없이 항상 렌더링 조건에 따라 css display 속성 전환
+- 이에 비해 v-show는 훨씬 간단. 초기조건과 관계없이 항상 렌더링. 조건에 따라 css display 속성 전환
 - 일반적으로 v-if는 전환비용이 높고, v-show는 초기 렌더링 비용이 높음.
 - 자주 전환해야한다면 v-show. 런타임 시 조건이 변경되지 않는다면 v-if.
 
